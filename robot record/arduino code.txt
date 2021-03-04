@@ -1,0 +1,65 @@
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(10,8);
+int IN1 = 3;
+int IN2 = 5;
+int IN3 = 6;
+int IN4 = 9;
+int val =200;
+char ch;
+void setup() {
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  mySerial.begin(9600);
+
+}
+
+void loop() {
+  if (mySerial.available()) {
+    ch = mySerial.read();
+    if (ch=='r') {
+      Right(val);
+    }
+    else if (ch=='l') {
+      Left(val);
+    }
+
+    else if (ch=='f') {
+      Forward(val);
+    }
+    else if (ch=='b') {
+      Backward(val);
+    }
+    else {
+      Stop();
+    }
+  }
+
+}
+
+void Right(int v) {
+  analogWrite(IN1, v);
+  analogWrite(IN3, v);
+  
+}
+void Left(int v) {
+  analogWrite(IN2, v);
+  analogWrite(IN4, v);
+ 
+}
+void Forward(int v) {
+  analogWrite(IN2, v);
+  analogWrite(IN3, v);
+}
+void Backward(int v) {
+  analogWrite(IN1, v);
+  analogWrite(IN4, v);
+}
+void Stop() {
+  analogWrite(IN1, 0);
+  analogWrite(IN2, 0);
+  analogWrite(IN4, 0);
+  analogWrite(IN3, 0);
+}
