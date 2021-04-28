@@ -1,0 +1,60 @@
+#include <Wire.h>
+#include<I2Cdev.h>
+#include <Adafruit_SH1106.h>
+#include <Adafruit_GFX.h>
+Adafruit_SH1106 oled(4);
+int led = 9;
+int counter = 0;
+bool on = false;
+int d8 = 8;
+int d7 = 7;
+void setup() {
+
+  pinMode(led, OUTPUT);
+  pinMode(d8, INPUT_PULLUP);
+  pinMode(d7, INPUT_PULLUP);
+  oled.begin(SH1106_SWITCHCAPVCC, 0x3C);
+  oled.clearDisplay();
+  oled.setTextSize(1);
+  oled.setTextColor(WHITE);
+
+}
+void loop() {
+  oled.setCursor(10, 10);
+  oled.print("delay =");
+  if (digitalRead(d7) == LOW) {
+    counter += 1;
+    
+  }
+
+    oled.setCursor(70, 10);
+    oled.print(counter);
+   
+  if (digitalRead(d8) == LOW) {
+    if (on == true) {
+      on = false;
+
+    }  else {
+      on = true;
+    }
+  }
+  delay(100);
+  if (on == true) {
+    counter -= 1;
+
+    if (counter == 1) {
+      analogWrite(led, 200);
+    }
+    if (counter < 1) {
+      counter = 1;
+    }
+    oled.setCursor(30, 40);
+    oled.print("C = ");
+    oled.setCursor(50, 40);
+    oled.print(counter);
+    oled.display();
+  }
+  oled.display();
+  oled.clearDisplay();
+
+}
