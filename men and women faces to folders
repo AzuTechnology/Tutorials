@@ -1,0 +1,65 @@
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.models import load_model
+import numpy as np
+import cv2
+import cvlib as cv
+
+# load model
+model = load_model('gender_detection.model')
+classes = ['man', 'woman']
+
+img = cv2.imread("faces.jpg")
+# img = cv2.resize(img,(1800,1800))
+# apply face detection
+face, confidence = cv.detect_face(img)
+
+def save_imgs(img,name, bbox, width=350,height=400):
+        x, y, w, h = bbox
+        # imgCrop = img[y:y + h, x:x + w]
+        img = img[y:h, x:w]
+        # img = cv2.resize(img, (width, height))
+        cv2.imwrite(name+".jpg", img)
+
+
+men_path ='D:/pythonProject2021/Facial Recognition/men/'
+women_path ='D:/pythonProject2021/Facial Recognition/women/'
+
+fit = 5
+# loop through detected faces
+counter =0
+counter2 =0
+for idx, f in enumerate(face):
+    (startX, startY) = f[0], f[1]
+    (endX, endY) = f[2], f[3]
+    face_crop = np.copy(img[startY:endY, startX:endX])
+    # if (face_crop.shape[0]) < 10 or (face_crop.shape[1]) < 10:
+    #     continue
+    # preprocessing for gender detection model
+    face_crop = cv2.resize(face_crop, (96, 96))
+    face_crop = face_crop.astype("float") / 255.0
+    face_crop = img_to_array(face_crop)
+    face_crop = np.expand_dims(face_crop, axis=0)
+    # apply gender detection on face
+    conf = model.predict(face_crop)[0]  # model.predict return a 2D matrix, ex: [[9.9993384e-01 7.4850512e-05]]
+
+    # get label with max accuracy
+    idx = np.argmax(conf)
+    label = classes[idx]
+
+    Y = startY - 10 if startY - 10 > 10 else startY + 10
+    percent = conf[idx] * 100
+    if label == "man" and percent > 80.0:
+        counter +=1
+        save_imgs(img, men_path+ label+str(counter), (startX - fit, startY - fit, endX + fit, endY + fit))
+    elif label == "woman" and percent > 70.0:
+        counter2 += 1
+        save_imgs(img, women_path+ label+str(counter2), (startX - fit, startY - fit, endX + fit, endY + fit))
+    cv2.putText(img, label, (startX, Y), cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 255, 0), 2)
+    cv2.rectangle(img, (startX, startY), (endX, endY), (0, 255, 0), 2)
+print("done saving---","men = ",counter,"---- women = ",counter2)
+
+# display output
+img = cv2.resize(img,(800,800))
+cv2.imshow("gender detection", img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
