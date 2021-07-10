@@ -1,0 +1,59 @@
+from firebase import firebase #python-firebase
+from tkinter import *
+
+win = Tk()
+win.geometry("400x400+300+300")
+win.configure(bg="gray")
+
+firebase =firebase.FirebaseApplication("https://python-cf8ee-default-rtdb.firebaseio.com/",None)
+
+def insert():
+    data = {
+        'State':'x'
+    }
+    result = firebase.post('/Arduino', data)
+    print(result)
+    # print('done')
+# insert()
+show_state = Label(win)
+show_state.place(x=230,y=175,width=50,height=50)
+
+def read():
+    result = firebase.get('/Arduino','')
+    state = result.get('-MeF6IWTA2s5G2usaPfN').get('State')
+    return state
+
+def run():
+    firebase.put('/Arduino/-MeF6IWTA2s5G2usaPfN','State',"a")
+    state = read()
+    if state =='a':
+        show_state['bg']='#51e8bb'
+def stop():
+    firebase.put('/Arduino/-MeF6IWTA2s5G2usaPfN','State',"x")
+    state = read()
+    if state == 'x':
+        show_state['bg'] = '#3d5c52'
+
+# start = Button(win, bd=0,text='start',command=run)
+# start.place(x=120, y=50)
+# stop_btn = Button(win, bd=0,text='stop',command=stop)
+# stop_btn.place(x=200, y=50)
+
+button = Button(win, bd=1,text='off',bg='#b50404',activebackground='gray')
+button.place(x=70, y=150,width=100,height=100)
+
+button_flag = True
+def on_off():
+    global button_flag
+    if button_flag:
+        button.config(text='on',bg="#e35656")
+        run()
+        button_flag = False
+    else:
+        button.config(text='off',bg='#b50404')
+        stop()
+        button_flag = True
+
+button['command']= on_off
+
+win.mainloop()
