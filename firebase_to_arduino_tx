@@ -5,7 +5,7 @@ win = Tk()
 win.geometry("400x400+300+300")
 win.configure(bg="gray")
 
-firebase =firebase.FirebaseApplication("https://python-cf8ee-default-rtdb.firebaseio.com/",None)
+firebase =firebase.FirebaseApplication("https://................/",None)
 
 def insert():
     data = {
