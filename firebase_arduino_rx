@@ -1,0 +1,22 @@
+from firebase import firebase #python-firebase
+import serial  #pyserial
+from tkinter import *
+
+win = Tk()
+win.geometry("400x400+1200+300")
+win.configure(bg="gray")
+
+ser = serial.Serial('COM3', '9600')
+firebase =firebase.FirebaseApplication("https://......................./",None)
+
+def read():
+    result = firebase.get('/Arduino','')
+    state = result.get('-MeF6IWTA2s5G2usaPfN').get('State')
+    # print(state)
+    ser.write((str(state)).encode('utf-8'))
+
+def act():
+    read()
+    win.after(300,act)
+act()
+win.mainloop()
