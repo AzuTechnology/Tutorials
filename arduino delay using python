@@ -1,0 +1,57 @@
+#python code:
+import serial  #pyserial
+from tkinter import *
+import datetime
+
+win = Tk()
+win.geometry("400x400+1200+300")
+bg_color ="gray"
+frame = Frame(win,width=400,height=400,bg=bg_color)
+frame.place(x=0,y=0)
+ser = serial.Serial('COM3', '9600')
+SHOW_DATE = Label(frame,font=('Arial',15,'bold'),bg=bg_color,fg="white")
+SHOW_DATE.place(x=100,y=10)
+def run():
+    now = datetime.datetime.now()
+    Date_now = now.strftime("%Y-%m-%d")
+    Time_now = now.strftime("%H :%M :%S")
+    SHOW_DATE['text']="date : "+Date_now + "\n"+"time : " + Time_now
+    m = now.strftime("%M")
+    if m == "08":
+        frame['bg']="red"
+        ser.write('f'.encode('utf-8'))
+    if m == "09":
+        frame['bg'] = bg_color
+        ser.write('x'.encode('utf-8'))
+    SHOW_DATE.after(10, run)
+
+run()
+win.mainloop()
+
+####################
+#arduino code:
+int leds[4]={11,10,9,3};
+void setup() {
+for (int i= 0 ;i<=5;i++){
+  pinMode(leds[i],OUTPUT);
+
+  Serial.begin(9600);
+}
+}
+
+void loop() {
+if (Serial.available()>0){
+  char ch = Serial.read();
+  if(ch =='f'){
+
+    digitalWrite(leds[0],HIGH);
+    
+  }
+  
+  else{
+    for(int i=0;i<=5;i++){
+      digitalWrite(leds[i],LOW);
+    }
+  }
+}
+}
