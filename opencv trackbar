@@ -1,0 +1,65 @@
+import cv2
+from tkinter import *
+import multiprocessing as mltp
+from PIL import ImageTk, Image
+
+win = Tk()
+win.geometry("800x600")
+win.configure(bg="gray17")
+cap = cv2.VideoCapture('D:\Images_for_py\Videos/highway.mp4')
+max_val = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+var = DoubleVar()
+
+class Control():
+    def __init__(self):
+        self.scale = Scale(win, from_=0, to=max_val - 1, orient=HORIZONTAL,
+                           variable=var,bg="gray17",fg="white", activebackground='#339999')
+
+        self.scale.set(0)
+        self.scale.place(x=100, y=455, width=604)
+        self.label = Label(win)
+        self.counter = 0
+        self.key = True
+        # self.display()
+        mltp.Process(target=self.display())
+        self.scale.bind("<ButtonPress-1>", lambda e: self.active_scaler())
+        self.scale.bind("<ButtonRelease-1>", lambda e: self.active_auto())
+
+    def to_pil(self, img):
+        img = cv2.resize(img, (600, 400))
+        img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
+        image = Image.fromarray(img)
+        pic = ImageTk.PhotoImage(image)
+        self.label.configure(image=pic)
+        self.label.image = pic
+        self.label.place(x=100, y=50)
+        cv2.destroyAllWindows()
+
+    def active_auto(self):
+        self.key = True
+
+    def active_scaler(self):
+        self.key = False
+
+    def display(self):
+        if self.key == True:
+            self.counter += 1
+            if self.counter >= max_val:
+                self.counter = max_val
+                cap.set(cv2.CAP_PROP_POS_FRAMES, self.counter - 1)
+            self.scale.set(self.counter)
+        else:
+            val = self.scale.get()
+            self.counter = val
+            cap.set(cv2.CAP_PROP_POS_FRAMES, self.counter)
+
+        _, frame = cap.read()
+        self.to_pil(frame)
+        win.after(20, self.display)
+
+
+if __name__ == '__main__':
+    Control()
+    win.mainloop()
+
+cap.release()
